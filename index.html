@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual-Standard AI Risk &amp; Algorithmic Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16202B;          /* deep slate ink */
+    --ink-soft:#3A4A5A;
+    --paper:#EEF2F5;        /* cool off-white */
+    --card:#FFFFFF;
+    --line:#D3DCE3;
+    --line-soft:#E4EAEF;
+    --eu:#14448C;           /* regulatory blue = the law */
+    --eu-tint:#E8EEF7;
+    --iso:#0F766E;          /* teal = the management system */
+    --iso-tint:#E3F1EF;
+    --high:#B42318;
+    --high-tint:#FBEAE8;
+    --med:#B54708;
+    --med-tint:#FCF0E6;
+    --low:#067647;
+    --low-tint:#E6F4EC;
+    --muted:#6B7B8A;
+    --shadow:0 1px 2px rgba(22,32,43,.06),0 8px 24px rgba(22,32,43,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:"Archivo",system-ui,sans-serif;letter-spacing:-.01em}
+  .mono{font-family:"IBM Plex Mono",monospace}
+
+  /* ---------- shell ---------- */
+  .topbar{
+    background:var(--ink);color:#fff;padding:18px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    position:sticky;top:0;z-index:40;
+  }
+  .brandmark{display:flex;align-items:center;gap:14px;min-width:0}
+  .logo{
+    width:40px;height:40px;border-radius:9px;flex:none;position:relative;
+    background:linear-gradient(135deg,var(--eu) 0 50%,var(--iso) 50% 100%);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .logo:after{content:"";position:absolute;inset:0;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+  .brandmark .t1{font-family:"Archivo";font-weight:800;font-size:15px;line-height:1.1}
+  .brandmark .t2{font-size:11.5px;color:#9FB2C4;letter-spacing:.03em}
+  .track-key{display:flex;gap:16px;font-size:11.5px;color:#C4D0DB}
+  .track-key span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .dot.eu{background:#5C8BD6}.dot.iso{background:#3FB0A3}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 80px;
+    display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start}
+
+  /* ---------- stepper ---------- */
+  .stepper{position:sticky;top:98px}
+  .stepper h4{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 14px 4px}
+  .progress-track{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 4px 18px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--eu),var(--iso));width:0;transition:width .4s ease}
+  .step{
+    display:flex;gap:12px;align-items:flex-start;padding:9px 10px;border-radius:10px;cursor:pointer;
+    border:1px solid transparent;transition:.15s;margin-bottom:2px;
+  }
+  .step:hover{background:#fff}
+  .step.active{background:#fff;border-color:var(--line);box-shadow:var(--shadow)}
+  .step .num{
+    flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);
+    font-family:"IBM Plex Mono";background:#fff;transition:.15s
+  }
+  .step.active .num{border-color:var(--ink);background:var(--ink);color:#fff}
+  .step.done .num{border-color:var(--iso);background:var(--iso);color:#fff}
+  .step .lbl{font-size:13.5px;font-weight:500;padding-top:3px;color:var(--ink-soft)}
+  .step.active .lbl{color:var(--ink);font-weight:600}
+
+  /* ---------- panel ---------- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+  .panel-head{padding:26px 30px 22px;border-bottom:1px solid var(--line-soft)}
+  .eyebrow{font-family:"IBM Plex Mono";font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .panel-head h2{margin:8px 0 6px;font-size:26px;font-weight:800;line-height:1.15}
+  .panel-head p.sub{margin:0;color:var(--ink-soft);font-size:14.5px;max-width:62ch}
+
+  /* signature: the standards spine */
+  .spine{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line-soft)}
+  .rail{padding:16px 30px 18px}
+  .rail.eu{background:var(--eu-tint);border-right:1px solid var(--line-soft)}
+  .rail.iso{background:var(--iso-tint)}
+  .rail .rail-h{display:flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:10px}
+  .rail.eu .rail-h{color:var(--eu)}
+  .rail.iso .rail-h{color:var(--iso)}
+  .rail .rail-h .tag{font-family:"IBM Plex Mono";font-weight:600}
+  .refchip{display:inline-flex;flex-direction:column;gap:1px;margin:0 8px 8px 0;vertical-align:top}
+  .refchip .code{font-family:"IBM Plex Mono";font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:6px;display:inline-block}
+  .rail.eu .code{background:#fff;color:var(--eu);border:1px solid #C5D5EC}
+  .rail.iso .code{background:#fff;color:var(--iso);border:1px solid #BEE0DB}
+  .refchip .desc{font-size:11.5px;color:var(--ink-soft);padding:2px 4px 0;max-width:30ch}
+
+  .panel-body{padding:26px 30px 30px}
+  .lede{font-size:14px;color:var(--ink-soft);margin:0 0 22px;max-width:70ch}
+
+  /* questions */
+  .q{margin-bottom:22px}
+  .q > .qlabel{display:block;font-weight:600;font-size:14.5px;margin-bottom:4px}
+  .q .qhelp{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:#fff;transition:.12s;font-size:13.5px}
+  .opt:hover{border-color:#B7C4CE;background:#FCFDFE}
+  .opt input{margin-top:2px;accent-color:var(--ink);flex:none}
+  .opt.flag{border-left:3px solid var(--high)}
+  .opt .otext{color:var(--ink-soft)}
+  .opt.checked{border-color:var(--ink);background:#F7FAFC}
+  textarea,input[type=text]{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-family:inherit;font-size:13.5px;
+    color:var(--ink);resize:vertical;background:#fff
+  }
+  textarea:focus,input[type=text]:focus,.opt:focus-within{outline:2px solid var(--eu);outline-offset:1px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  /* risk item */
+  .riskitem{border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:12px;background:#FCFDFE}
+  .riskitem .rtitle{font-weight:600;font-size:14px;margin-bottom:3px}
+  .riskitem .rdesc{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .rrow{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+  .rrow .field{display:flex;flex-direction:column;gap:5px}
+  .rrow .field span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{border:0;background:#fff;padding:6px 13px;font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--ink-soft);border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button.sel[data-v="Low"]{background:var(--low-tint);color:var(--low);font-weight:600}
+  .seg button.sel[data-v="Medium"]{background:var(--med-tint);color:var(--med);font-weight:600}
+  .seg button.sel[data-v="High"]{background:var(--high-tint);color:var(--high);font-weight:600}
+  .rrating{margin-left:auto;font-family:"IBM Plex Mono";font-size:12px;font-weight:600;padding:5px 11px;border-radius:7px;background:#F0F3F6;color:var(--muted)}
+  .rrating.Low{background:var(--low-tint);color:var(--low)}
+  .rrating.Medium{background:var(--med-tint);color:var(--med)}
+  .rrating.High,.rrating.Critical{background:var(--high-tint);color:var(--high)}
+
+  /* nav */
+  .navbtns{display:flex;justify-content:space-between;gap:12px;margin-top:28px}
+  button.btn{font-family:"Archivo";font-weight:600;font-size:14px;padding:12px 22px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
+  button.btn:hover{border-color:#B7C4CE}
+  button.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  button.btn.primary:hover{background:#0E1720}
+  button.btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* ---------- summary ---------- */
+  .classbanner{padding:22px 26px;border-radius:14px;margin-bottom:24px;display:flex;gap:18px;align-items:center;border:1px solid}
+  .classbanner .cb-badge{font-family:"Archivo";font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;padding:8px 14px;border-radius:8px;white-space:nowrap}
+  .classbanner .cb-txt strong{display:block;font-family:"Archivo";font-size:18px;margin-bottom:2px}
+  .classbanner .cb-txt span{font-size:13px}
+  .cb-High{background:var(--high-tint);border-color:#F0C4BE}
+  .cb-High .cb-badge{background:var(--high);color:#fff}
+  .cb-Prohibited{background:#2a0f0c;border-color:#2a0f0c;color:#fff}
+  .cb-Prohibited .cb-badge{background:var(--high);color:#fff}
+  .cb-Prohibited .cb-txt span{color:#E9C9C4}
+  .cb-Limited{background:var(--med-tint);border-color:#F0D6BE}
+  .cb-Limited .cb-badge{background:var(--med);color:#fff}
+  .cb-Minimal{background:var(--low-tint);border-color:#BEE3CD}
+  .cb-Minimal .cb-badge{background:var(--low);color:#fff}
+
+  .sec-title{font-family:"Archivo";font-weight:700;font-size:16px;margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+  .sec-title .bar{width:4px;height:18px;border-radius:2px;background:linear-gradient(var(--eu),var(--iso))}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  td .pill{font-family:"IBM Plex Mono";font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px}
+  .pill.Low{background:var(--low-tint);color:var(--low)}
+  .pill.Medium{background:var(--med-tint);color:var(--med)}
+  .pill.High,.pill.Critical{background:var(--high-tint);color:var(--high)}
+
+  /* coverage matrix */
+  .matrix{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .mrow{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:0;border-bottom:1px solid var(--line-soft);align-items:center}
+  .mrow:last-child{border-bottom:0}
+  .mrow.head{background:#F5F8FA;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  .mrow > div{padding:11px 14px}
+  .mrow .mc-eu,.mrow .mc-iso{font-family:"IBM Plex Mono";font-size:12px}
+  .mrow .mc-eu{color:var(--eu)}.mrow .mc-iso{color:var(--iso)}
+  .mrow .stage-n{font-weight:600;font-size:13.5px}
+  .mstat{font-family:"IBM Plex Mono";font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;text-align:center;min-width:74px;display:inline-block}
+  .mstat.req{background:var(--high-tint);color:var(--high)}
+  .mstat.na{background:#F0F3F6;color:var(--muted)}
+  .mstat.rec{background:var(--eu-tint);color:var(--eu)}
+
+  .gap{display:flex;gap:10px;padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--med);border-radius:9px;margin-bottom:9px;font-size:13px;background:#FFFDF9}
+  .gap .gi{color:var(--med);font-weight:700;flex:none}
+  .empty-note{color:var(--muted);font-size:13px;font-style:italic}
+
+  .disclaimer{margin-top:26px;padding:14px 16px;background:#F5F8FA;border-radius:10px;font-size:11.5px;color:var(--muted);line-height:1.5}
+
+  @media(max-width:880px){
+    .wrap{grid-template-columns:1fr;gap:18px}
+    .stepper{position:static;order:-1}
+    .step-list{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}
+    .step{flex-direction:column;align-items:center;min-width:64px;text-align:center;padding:8px 6px}
+    .step .lbl{font-size:10px;padding-top:6px}
+    .spine{grid-template-columns:1fr}
+    .rail.eu{border-right:0;border-bottom:1px solid var(--line-soft)}
+    .grid2{grid-template-columns:1fr}
+    .track-key{display:none}
+    .mrow{grid-template-columns:1fr;gap:2px}
+    .mrow.head{display:none}
+    .mrow > div{padding:6px 14px}
+    .mrow .stage-n{padding-top:12px}
+  }
+  @media print{
+    .topbar,.stepper,.navbtns,.no-print{display:none!important}
+    .wrap{display:block;max-width:none;padding:0}
+    .panel{border:0;box-shadow:none}
+    body{background:#fff}
+    .mrow,.gap,.riskitem,table{break-inside:avoid}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brandmark">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <div class="t1">Dual-Standard AI Assessment</div>
+      <div class="t2">EU AI Act (2024/1689) &nbsp;·&nbsp; ISO/IEC 42001:2023</div>
+    </div>
+  </div>
+  <div class="track-key">
+    <span><span class="dot eu"></span> EU AI Act — legal obligation</span>
+    <span><span class="dot iso"></span> ISO/IEC 42001 — management control</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- STEPPER -->
+  <nav class="stepper" aria-label="Assessment stages">
+    <h4>Assessment stages</h4>
+    <div class="progress-track"><div class="progress-fill" id="pfill"></div></div>
+    <div class="step-list" id="steplist"></div>
+  </nav>
+
+  <!-- PANEL -->
+  <main>
+    <section class="panel" id="panel" aria-live="polite"></section>
+    <div class="navbtns no-print">
+      <button class="btn" id="backBtn">← Back</button>
+      <button class="btn primary" id="nextBtn">Continue →</button>
+    </div>
+  </main>
+</div>
+
+<script>
+/* =========================================================================
+   STAGE DEFINITIONS
+   Each stage carries the EU AI Act provisions and ISO/IEC 42001 components
+   that govern that stage — this parallel mapping is the tool's core.
+   ========================================================================= */
+const STAGES = [
+  {
+    id:"profile", short:"Profile",
+    eyebrow:"Stage 01 · Scope & role",
+    title:"System profile and your role",
+    sub:"Establish what the system is, who you are in the value chain, and the context of use. This frames every obligation that follows.",
+    eu:[
+      {code:"Art. 2–3", d:"Scope & definitions — is the system in scope?"},
+      {code:"Art. 25", d:"Responsibilities along the AI value chain"},
+      {code:"Art. 51", d:"General-purpose AI (GPAI) model triggers"}
+    ],
+    iso:[
+      {code:"Clause 4", d:"Context of the organization (4.1–4.3)"},
+      {code:"A.3", d:"Internal organization & accountability"},
+      {code:"A.6.2.2", d:"AI system requirements & specification"}
+    ]
+  },
+  {
+    id:"classify", short:"Risk class",
+    eyebrow:"Stage 02 · The classification gate",
+    title:"Risk classification",
+    sub:"The EU AI Act is risk-tiered. This gate decides which obligations apply. ISO/IEC 42001 mirrors it through your own risk-assessment criteria.",
+    eu:[
+      {code:"Art. 5", d:"Prohibited practices (unacceptable risk)"},
+      {code:"Art. 6 + Annex III", d:"High-risk classification"},
+      {code:"Art. 50", d:"Limited-risk transparency triggers"}
+    ],
+    iso:[
+      {code:"Clause 6.1.2", d:"AI risk assessment (criteria & process)"},
+      {code:"A.5.2", d:"AI system impact assessment process"}
+    ]
+  },
+  {
+    id:"data", short:"Data",
+    eyebrow:"Stage 03 · Data risk",
+    title:"Data and data governance",
+    sub:"Assess the datasets behind the system: sourcing, quality, representativeness, bias and lawful basis. Rate each data risk.",
+    eu:[
+      {code:"Art. 10", d:"Data & data governance for high-risk systems"},
+      {code:"Art. 10(5)", d:"Special-category data for bias detection"}
+    ],
+    iso:[
+      {code:"A.7.2", d:"Data management process"},
+      {code:"A.7.3", d:"Acquisition of data"},
+      {code:"A.7.4", d:"Quality of data for AI systems"},
+      {code:"A.7.5", d:"Data provenance"},
+      {code:"A.7.6", d:"Data preparation"}
+    ],
+    risks:[
+      {t:"Representativeness & coverage gaps",d:"Training data under-represents affected populations or use contexts."},
+      {t:"Bias in labels or features",d:"Historical or proxy bias embedded in the dataset."},
+      {t:"Provenance & lawful basis",d:"Unclear sourcing, consent, or licensing of data."},
+      {t:"Data quality & accuracy",d:"Errors, staleness, missing values, annotation quality."}
+    ]
+  },
+  {
+    id:"algo", short:"Algorithm",
+    eyebrow:"Stage 04 · Algorithmic risk",
+    title:"Algorithmic and model risk",
+    sub:"Evaluate the model itself — accuracy, robustness, security, fairness and explainability across the life cycle.",
+    eu:[
+      {code:"Art. 15", d:"Accuracy, robustness & cybersecurity"},
+      {code:"Art. 9", d:"Risk management system (iterative)"}
+    ],
+    iso:[
+      {code:"A.6.2.3", d:"AI system design & development"},
+      {code:"A.6.2.4", d:"Verification & validation"},
+      {code:"Clause 8.2", d:"AI risk assessment (operational)"}
+    ],
+    risks:[
+      {t:"Accuracy / performance shortfall",d:"Model underperforms on real-world or edge-case inputs."},
+      {t:"Robustness & drift",d:"Sensitivity to noise, adversarial inputs, or distribution shift over time."},
+      {t:"Fairness across groups",d:"Disparate error rates or outcomes between protected groups."},
+      {t:"Explainability deficit",d:"Outputs cannot be adequately interpreted or contested."},
+      {t:"Cybersecurity exposure",d:"Vulnerability to poisoning, model theft, or prompt-based attacks."}
+    ]
+  },
+  {
+    id:"impact", short:"Impact",
+    eyebrow:"Stage 05 · Rights & societal impact",
+    title:"Fundamental rights and societal impact",
+    sub:"Assess effects on individuals and groups — the EU AI Act's FRIA and ISO/IEC 42001's AI system impact assessment converge here.",
+    eu:[
+      {code:"Art. 27", d:"Fundamental Rights Impact Assessment (FRIA)"},
+      {code:"Art. 26", d:"Deployer obligations toward affected persons"}
+    ],
+    iso:[
+      {code:"Clause 6.1.4", d:"AI system impact assessment (planning)"},
+      {code:"Clause 8.4", d:"AI system impact assessment (operational)"},
+      {code:"A.5.2–A.5.5", d:"Assessing impacts on individuals & society"}
+    ],
+    risks:[
+      {t:"Impact on fundamental rights",d:"Effect on privacy, non-discrimination, dignity or due process."},
+      {t:"Harm to vulnerable groups",d:"Disproportionate effect on children, minorities, or at-risk persons."},
+      {t:"Autonomy & contestability",d:"Ability of affected persons to understand, challenge or opt out."},
+      {t:"Societal / systemic effect",d:"Scale effects on access to services, employment, or public trust."}
+    ]
+  },
+  {
+    id:"transparency", short:"Transparency",
+    eyebrow:"Stage 06 · Transparency & oversight",
+    title:"Transparency, documentation and human oversight",
+    sub:"Confirm the record-keeping, disclosure and human-control measures are in place and effective.",
+    eu:[
+      {code:"Art. 11", d:"Technical documentation"},
+      {code:"Art. 12", d:"Record-keeping / automatic logging"},
+      {code:"Art. 13", d:"Transparency & information to deployers"},
+      {code:"Art. 14", d:"Human oversight"},
+      {code:"Art. 50", d:"Disclosure to affected persons"}
+    ],
+    iso:[
+      {code:"A.8.2–A.8.4", d:"Information for interested parties"},
+      {code:"A.9.2–A.9.4", d:"Responsible use of AI systems"},
+      {code:"Clause 7.5", d:"Documented information"}
+    ],
+    checks:[
+      {t:"Technical documentation maintained",d:"System design, capabilities, limitations documented and current."},
+      {t:"Automatic logging enabled",d:"Traceable event logs retained for the operating period."},
+      {t:"User-facing disclosure",d:"Affected persons are told they are interacting with / subject to AI."},
+      {t:"Human oversight assigned",d:"Named oversight role with authority to intervene or stop."}
+    ]
+  },
+  {
+    id:"treatment", short:"Treatment",
+    eyebrow:"Stage 07 · Risk treatment & controls",
+    title:"Risk treatment and controls",
+    sub:"Decide how each residual risk is treated and who owns it. This becomes your Statement of Applicability and risk-treatment record.",
+    eu:[
+      {code:"Art. 9", d:"Risk management measures & residual risk"},
+      {code:"Art. 17", d:"Quality management system"}
+    ],
+    iso:[
+      {code:"Clause 6.1.3", d:"AI risk treatment & Statement of Applicability"},
+      {code:"Clause 8.3", d:"AI risk treatment (operational)"},
+      {code:"A.2", d:"Policies related to AI"}
+    ],
+    checks:[
+      {t:"Risk-treatment plan approved",d:"Each material risk has an owner, action, and target date."},
+      {t:"Statement of Applicability drafted",d:"Annex A controls justified as included or excluded."},
+      {t:"Residual risk formally accepted",d:"Accountable owner has signed off remaining risk."},
+      {t:"AI policy links to controls",d:"Organisational AI policy references these controls."}
+    ]
+  },
+  {
+    id:"monitor", short:"Monitor",
+    eyebrow:"Stage 08 · Monitoring & improvement",
+    title:"Monitoring, incidents and continual improvement",
+    sub:"Close the loop: post-market monitoring, incident reporting, performance review and improvement.",
+    eu:[
+      {code:"Art. 72", d:"Post-market monitoring"},
+      {code:"Art. 73", d:"Serious incident reporting"},
+      {code:"Art. 43 / 47 / 49", d:"Conformity, declaration & registration"}
+    ],
+    iso:[
+      {code:"Clause 9", d:"Performance evaluation, audit & management review"},
+      {code:"Clause 10", d:"Nonconformity & continual improvement"},
+      {code:"A.6.2.6", d:"AI system operation & monitoring"}
+    ],
+    checks:[
+      {t:"Post-market monitoring plan",d:"Live metrics tracked against expected performance."},
+      {t:"Incident reporting route",d:"Process to detect, escalate and report serious incidents."},
+      {t:"Management review scheduled",d:"Governance body reviews the system at set intervals."},
+      {t:"Improvement actions tracked",d:"Findings feed corrective and improvement actions."}
+    ]
+  },
+  { id:"summary", short:"Summary", isSummary:true,
+    eyebrow:"Result · Assessment output",
+    title:"Assessment summary",
+    sub:"Classification, risk register, dual-standard coverage and gaps." }
+];
+
+/* prohibited & high-risk & transparency option sets for the classification gate */
+const PROHIBITED=[
+  "Subliminal, manipulative or deceptive techniques causing significant harm",
+  "Exploitation of vulnerabilities (age, disability, socio-economic situation)",
+  "Social scoring of individuals leading to detrimental treatment",
+  "Untargeted scraping of facial images to build recognition databases",
+  "Emotion inference in the workplace or education (outside medical/safety)",
+  "Biometric categorisation inferring sensitive attributes (e.g. race, beliefs)",
+  "Real-time remote biometric identification in public for law enforcement"
+];
+const HIGHRISK=[
+  "Safety component of a product covered by EU harmonisation law (Annex I)",
+  "Biometrics / biometric identification or categorisation (permitted uses)",
+  "Critical infrastructure management (e.g. water, gas, electricity, traffic)",
+  "Education & vocational training (access, evaluation, exam scoring)",
+  "Employment, worker management & access to self-employment",
+  "Access to essential private & public services (e.g. credit, benefits)",
+  "Law enforcement",
+  "Migration, asylum & border control",
+  "Administration of justice & democratic processes"
+];
+const TRANSPARENCY=[
+  "System interacts directly with people (e.g. chatbot / assistant)",
+  "Generates synthetic audio, image, video or text (generative / GPAI)",
+  "Emotion recognition or biometric categorisation (permitted context)",
+  "Produces deep fakes or manipulated media"
+];
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+let current=0;
+const state={
+  profile:{}, prohibited:new Set(), highrisk:new Set(), transparency:new Set(),
+  risks:{}, checks:{}
+};
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+const panel=document.getElementById("panel");
+const steplist=document.getElementById("steplist");
+const pfill=document.getElementById("pfill");
+
+function buildStepper(){
+  steplist.innerHTML="";
+  STAGES.forEach((s,i)=>{
+    const el=document.createElement("div");
+    el.className="step"+(i===current?" active":"")+(i<current?" done":"");
+    el.innerHTML=`<div class="num">${i<current?"✓":(i+1)}</div><div class="lbl">${s.short}</div>`;
+    el.onclick=()=>{ if(i<=furthest()) go(i); };
+    steplist.appendChild(el);
+  });
+  pfill.style.width=(current/(STAGES.length-1)*100)+"%";
+}
+function furthest(){ return STAGES.length-1; } // free navigation
+
+function railHTML(s){
+  const eu=s.eu.map(r=>`<span class="refchip"><span class="code">${r.code}</span><span class="desc">${r.d}</span></span>`).join("");
+  const iso=s.iso.map(r=>`<span class="refchip"><span class="code">${r.code}</span><span class="desc">${r.d}</span></span>`).join("");
+  return `<div class="spine">
+    <div class="rail eu"><div class="rail-h"><span class="dot eu"></span> EU AI Act <span class="tag">— legal</span></div>${eu}</div>
+    <div class="rail iso"><div class="rail-h"><span class="dot iso"></span> ISO/IEC 42001 <span class="tag">— control</span></div>${iso}</div>
+  </div>`;
+}
+function headHTML(s){
+  return `<div class="panel-head">
+      <div class="eyebrow">${s.eyebrow}</div>
+      <h2>${s.title}</h2>
+      <p class="sub">${s.sub}</p>
+    </div>${s.isSummary?"":railHTML(s)}`;
+}
+
+function optList(name,arr,set,flag){
+  return `<div class="opts">`+arr.map((o,i)=>{
+    const on=set.has(o);
+    return `<label class="opt${flag?" flag":""}${on?" checked":""}">
+      <input type="checkbox" ${on?"checked":""} data-set="${name}" data-val="${escapeAttr(o)}">
+      <span class="otext">${o}</span></label>`;
+  }).join("")+`</div>`;
+}
+function riskBlock(stageId,risks){
+  return risks.map((r,i)=>{
+    const key=stageId+":"+i;
+    const cur=state.risks[key]||{};
+    const rating=computeRating(cur.l,cur.impact);
+    return `<div class="riskitem" data-key="${key}">
+      <div class="rtitle">${r.t}</div><div class="rdesc">${r.d}</div>
+      <div class="rrow">
+        ${seg("l",key,cur.l,"Likelihood")}
+        ${seg("impact",key,cur.impact,"Impact")}
+        <span class="rrating ${rating}" data-rate>${rating||"—"}</span>
+      </div></div>`;
+  }).join("");
+}
+function seg(dim,key,val,label){
+  const vals=["Low","Medium","High"];
+  return `<div class="field"><span>${label}</span><div class="seg" data-dim="${dim}" data-key="${key}">`+
+    vals.map(v=>`<button data-v="${v}" class="${val===v?"sel":""}">${v}</button>`).join("")+`</div></div>`;
+}
+function checkBlock(stageId,checks){
+  return checks.map((c,i)=>{
+    const key=stageId+":"+i; const on=state.checks[key];
+    return `<label class="opt${on?" checked":""}" style="margin-bottom:8px">
+      <input type="checkbox" ${on?"checked":""} data-check="${key}">
+      <span class="otext"><strong style="color:var(--ink)">${c.t}</strong><br><span style="font-size:12px;color:var(--muted)">${c.d}</span></span>
+    </label>`;
+  }).join("");
+}
+
+function bodyHTML(s){
+  if(s.isSummary) return summaryHTML();
+  let b="";
+  if(s.id==="profile"){
+    const p=state.profile;
+    b=`<p class="lede">Describe the system under assessment. These answers frame the scope determination and appear in your assessment record.</p>
+      <div class="q"><label class="qlabel">System name</label>
+        <input type="text" data-p="name" value="${escapeAttr(p.name||"")}" placeholder="e.g. Applicant screening model"></div>
+      <div class="q"><label class="qlabel">Intended purpose</label>
+        <div class="qhelp">What decision or output does it produce, and for whom?</div>
+        <textarea rows="3" data-p="purpose" placeholder="Describe the intended purpose and users…">${escapeHTML(p.purpose||"")}</textarea></div>
+      <div class="grid2">
+        <div class="q"><label class="qlabel">Your role in the value chain</label>
+          <div class="opts">${["Provider (develops / places on market)","Deployer (uses under own authority)","Importer / Distributor","Product manufacturer"].map(r=>radio("role",r,p.role)).join("")}</div></div>
+        <div class="q"><label class="qlabel">Does it build on a general-purpose AI model?</label>
+          <div class="opts">${["Yes — GPAI-based","No","Not sure"].map(r=>radio("gpai",r,p.gpai)).join("")}</div></div>
+      </div>
+      <div class="q"><label class="qlabel">Deployment context & affected persons</label>
+        <textarea rows="2" data-p="context" placeholder="Sector, geography, who is affected by the outputs…">${escapeHTML(p.context||"")}</textarea></div>`;
+  }
+  else if(s.id==="classify"){
+    b=`<p class="lede">Work top-down. A single prohibited practice stops deployment outright. Otherwise, any high-risk category triggers the full Article 9–15 regime; transparency triggers apply on top.</p>
+      <div class="q"><label class="qlabel" style="color:var(--high)">1 · Prohibited practices — Art. 5</label>
+        <div class="qhelp">Tick any that apply. Any tick = unacceptable risk.</div>
+        ${optList("prohibited",PROHIBITED,state.prohibited,true)}</div>
+      <div class="q"><label class="qlabel" style="color:var(--eu)">2 · High-risk categories — Annex III / Art. 6</label>
+        <div class="qhelp">Tick any use that matches. Any tick = high-risk.</div>
+        ${optList("highrisk",HIGHRISK,state.highrisk,false)}</div>
+      <div class="q"><label class="qlabel">3 · Transparency triggers — Art. 50</label>
+        <div class="qhelp">These add disclosure duties regardless of tier.</div>
+        ${optList("transparency",TRANSPARENCY,state.transparency,false)}</div>
+      <div id="liveclass"></div>`;
+  }
+  else if(s.risks){
+    b=`<p class="lede">Rate each risk by likelihood and impact. Ratings roll up into the register and drive the residual-risk view in the summary.</p>${riskBlock(s.id,s.risks)}`;
+  }
+  else if(s.checks){
+    b=`<p class="lede">Confirm each measure is in place. Unticked items surface as gaps against the mapped provisions above.</p>${checkBlock(s.id,s.checks)}`;
+  }
+  return `<div class="panel-body">${b}</div>`;
+}
+
+function radio(name,val,cur){
+  return `<label class="opt${cur===val?" checked":""}"><input type="radio" name="${name}" data-p="${name}" data-val="${escapeAttr(val)}" ${cur===val?"checked":""}><span class="otext">${val}</span></label>`;
+}
+
+function render(){
+  const s=STAGES[current];
+  panel.innerHTML=headHTML(s)+bodyHTML(s);
+  buildStepper();
+  document.getElementById("backBtn").disabled=(current===0);
+  const nb=document.getElementById("nextBtn");
+  nb.textContent = current===STAGES.length-2 ? "See summary →" : (s.isSummary?"Download report":"Continue →");
+  bindInputs();
+  if(s.id==="classify") updateLiveClass();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* =========================================================================
+   CLASSIFICATION LOGIC
+   ========================================================================= */
+function classification(){
+  if(state.prohibited.size>0) return "Prohibited";
+  if(state.highrisk.size>0) return "High";
+  if(state.transparency.size>0) return "Limited";
+  return "Minimal";
+}
+const CLASS_META={
+  Prohibited:{label:"Unacceptable",head:"Prohibited under Article 5",note:"This use is banned in the EU. It must not be placed on the market or put into service. Redesign to remove the prohibited practice before proceeding."},
+  High:{label:"High risk",head:"High-risk AI system",note:"The full obligations of Articles 9–15, 17 and (for deployers) 26–27 apply. ISO/IEC 42001 Clauses 6 and 8 with Annex A controls give you the management-system backbone to meet them."},
+  Limited:{label:"Limited risk",head:"Transparency obligations",note:"Article 50 disclosure duties apply. A lighter ISO/IEC 42001 impact assessment (A.5) is proportionate, but transparency to affected persons is mandatory."},
+  Minimal:{label:"Minimal risk",head:"Minimal / no specific obligation",note:"No mandatory EU AI Act duties beyond voluntary codes. ISO/IEC 42001 remains valuable for governance assurance and future-proofing."}
+};
+function updateLiveClass(){
+  const el=document.getElementById("liveclass"); if(!el) return;
+  const c=classification(); const m=CLASS_META[c];
+  el.innerHTML=`<div class="classbanner cb-${c}">
+      <div class="cb-badge">${m.label}</div>
+      <div class="cb-txt"><strong>${m.head}</strong><span>${m.note}</span></div></div>`;
+}
+
+/* =========================================================================
+   RISK RATING (likelihood × impact)
+   ========================================================================= */
+function computeRating(l,i){
+  if(!l||!i) return "";
+  const v={Low:1,Medium:2,High:3};
+  const s=v[l]*v[i];
+  if(s>=6) return s===9?"Critical":"High";
+  if(s>=3) return "Medium";
+  return "Low";
+}
+
+/* =========================================================================
+   SUMMARY
+   ========================================================================= */
+function summaryHTML(){
+  const c=classification(); const m=CLASS_META[c];
+  // risk register
+  let rows=[];
+  STAGES.forEach(s=>{ if(!s.risks) return;
+    s.risks.forEach((r,i)=>{const cur=state.risks[s.id+":"+i]||{};const rate=computeRating(cur.l,cur.impact);
+      if(rate) rows.push({area:s.short,name:r.t,l:cur.l,imp:cur.impact,rate});});
+  });
+  rows.sort((a,b)=>({Critical:4,High:3,Medium:2,Low:1}[b.rate]-{Critical:4,High:3,Medium:2,Low:1}[a.rate]));
+  const regRows = rows.length? rows.map(r=>`<tr>
+      <td>${r.name}<br><span style="font-size:11px;color:var(--muted)">${r.area}</span></td>
+      <td><span class="pill ${r.l}">${r.l}</span></td>
+      <td><span class="pill ${r.imp}">${r.imp}</span></td>
+      <td><span class="pill ${r.rate}">${r.rate}</span></td></tr>`).join("")
+    : `<tr><td colspan="4" class="empty-note">No risks rated yet — revisit the Data, Algorithm and Impact stages.</td></tr>`;
+
+  // coverage matrix — applicability keyed off classification
+  const cov=[
+    {stage:"Data governance",eu:"Art. 10",iso:"A.7",need:c==="High"?"req":"rec"},
+    {stage:"Accuracy / robustness / security",eu:"Art. 15",iso:"A.6.2.4",need:c==="High"?"req":"rec"},
+    {stage:"Risk management",eu:"Art. 9",iso:"Cl. 6.1 / 8.2",need:c==="High"?"req":"rec"},
+    {stage:"Impact / rights assessment",eu:"Art. 27 (FRIA)",iso:"Cl. 6.1.4 / A.5",need:c==="High"?"req":(c==="Limited"?"rec":"na")},
+    {stage:"Technical documentation",eu:"Art. 11",iso:"Cl. 7.5 / A.8",need:c==="High"?"req":"rec"},
+    {stage:"Logging / record-keeping",eu:"Art. 12",iso:"A.6.2.6",need:c==="High"?"req":"rec"},
+    {stage:"Human oversight",eu:"Art. 14",iso:"A.9",need:c==="High"?"req":"rec"},
+    {stage:"Transparency to persons",eu:"Art. 50",iso:"A.8.2",need:(c==="High"||c==="Limited")?"req":"na"},
+    {stage:"Risk treatment / SoA",eu:"Art. 9 / 17",iso:"Cl. 6.1.3",need:c==="High"?"req":"rec"},
+    {stage:"Post-market monitoring",eu:"Art. 72",iso:"Cl. 9 / A.6.2.6",need:c==="High"?"req":"rec"},
+    {stage:"Conformity & registration",eu:"Art. 43 / 49",iso:"Cl. 9.3",need:c==="High"?"req":"na"}
+  ];
+  const statTxt={req:"Required",rec:"Recommended",na:"Not triggered"};
+  const covRows=cov.map(x=>`<div class="mrow">
+      <div class="stage-n">${x.stage}</div>
+      <div class="mc-eu">${x.eu}</div>
+      <div class="mc-iso">${x.iso}</div>
+      <div><span class="mstat ${x.need}">${statTxt[x.need]}</span></div></div>`).join("");
+
+  // gaps from unticked checks
+  let gaps=[];
+  STAGES.forEach(s=>{ if(!s.checks) return;
+    s.checks.forEach((ch,i)=>{ if(!state.checks[s.id+":"+i]) gaps.push({t:ch.t,ref:s.eu[0]?s.eu[0].code:""}); });
+  });
+  if(c==="Prohibited") gaps.unshift({t:"Prohibited practice present — deployment is not lawful under Art. 5",ref:"Art. 5"});
+  const gapHTML = gaps.length? gaps.map(g=>`<div class="gap"><span class="gi">!</span><div><strong>${g.t}</strong>${g.ref?` <span class="mono" style="color:var(--muted);font-size:11px">(${g.ref})</span>`:""}</div></div>`).join("")
+    : `<p class="empty-note">No open gaps recorded. Confirm evidence is attached before sign-off.</p>`;
+
+  const p=state.profile;
+  return `<div class="panel-body">
+    <div class="classbanner cb-${c}">
+      <div class="cb-badge">${m.label}</div>
+      <div class="cb-txt"><strong>${m.head}</strong><span>${m.note}</span></div>
+    </div>
+
+    ${p.name||p.purpose?`<div class="sec-title"><span class="bar"></span>System</div>
+      <table><tr><th style="width:130px">System</th><td>${escapeHTML(p.name||"—")}</td></tr>
+      <tr><th>Purpose</th><td>${escapeHTML(p.purpose||"—")}</td></tr>
+      <tr><th>Role</th><td>${escapeHTML(p.role||"—")}${p.gpai?` · ${escapeHTML(p.gpai)}`:""}</td></tr>
+      <tr><th>Context</th><td>${escapeHTML(p.context||"—")}</td></tr></table>`:""}
+
+    <div class="sec-title"><span class="bar"></span>Risk register</div>
+    <table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Rating</th></tr></thead>
+      <tbody>${regRows}</tbody></table>
+
+    <div class="sec-title"><span class="bar"></span>Dual-standard coverage</div>
+    <div class="matrix">
+      <div class="mrow head"><div>Requirement</div><div>EU AI Act</div><div>ISO/IEC 42001</div><div>Applicability</div></div>
+      ${covRows}
+    </div>
+
+    <div class="sec-title"><span class="bar"></span>Open gaps &amp; actions</div>
+    ${gapHTML}
+
+    <div class="disclaimer">This tool structures an assessment against Regulation (EU) 2024/1689 (EU AI Act) and ISO/IEC 42001:2023. Provision and clause references are indicative and abbreviated for navigation; verify against the current consolidated texts and your notified-body / certification guidance. It supports, but does not replace, legal review or a formal conformity assessment.</div>
+  </div>`;
+}
+
+/* =========================================================================
+   INPUT BINDING
+   ========================================================================= */
+function bindInputs(){
+  // checkbox sets (classification)
+  panel.querySelectorAll('input[data-set]').forEach(inp=>{
+    inp.onchange=()=>{
+      const set=state[inp.dataset.set]; const v=inp.dataset.val;
+      inp.checked?set.add(v):set.delete(v);
+      inp.closest(".opt").classList.toggle("checked",inp.checked);
+      updateLiveClass();
+    };
+  });
+  // profile text/radio
+  panel.querySelectorAll('[data-p]').forEach(inp=>{
+    const k=inp.dataset.p;
+    if(inp.type==="radio"){
+      inp.onchange=()=>{ state.profile[k]=inp.dataset.val;
+        panel.querySelectorAll(`input[name="${inp.name}"]`).forEach(r=>r.closest(".opt").classList.toggle("checked",r.checked)); };
+    } else {
+      inp.oninput=()=>{ state.profile[k]=inp.value; };
+    }
+  });
+  // check items
+  panel.querySelectorAll('input[data-check]').forEach(inp=>{
+    inp.onchange=()=>{ state.checks[inp.dataset.check]=inp.checked;
+      inp.closest(".opt").classList.toggle("checked",inp.checked); };
+  });
+  // risk segments
+  panel.querySelectorAll('.seg').forEach(seg=>{
+    const dim=seg.dataset.dim,key=seg.dataset.key;
+    seg.querySelectorAll("button").forEach(btn=>{
+      btn.onclick=()=>{
+        seg.querySelectorAll("button").forEach(b=>b.classList.remove("sel"));
+        btn.classList.add("sel");
+        state.risks[key]=state.risks[key]||{};
+        state.risks[key][dim]=btn.dataset.v;
+        const cur=state.risks[key];
+        const rate=computeRating(cur.l,cur.impact);
+        const rt=seg.closest(".riskitem").querySelector("[data-rate]");
+        rt.textContent=rate||"—"; rt.className="rrating "+rate;
+      };
+    });
+  });
+}
+
+/* =========================================================================
+   NAV
+   ========================================================================= */
+function go(i){ current=Math.max(0,Math.min(STAGES.length-1,i)); render(); }
+document.getElementById("nextBtn").onclick=()=>{
+  if(STAGES[current].isSummary){ exportReport(); return; }
+  go(current+1);
+};
+document.getElementById("backBtn").onclick=()=>go(current-1);
+
+/* Build a standalone, printable report and download it. Reliable inside
+   sandboxed frames where window.print() is blocked; the saved file opens
+   in a normal tab where its own Print button works. */
+function exportReport(){
+  const styleTxt=document.querySelector("style").textContent;
+  const content=panel.innerHTML;
+  const stamp=new Date().toLocaleString();
+  const doc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'+
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>AI Assessment Report</title>'+
+    '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">'+
+    '<style>'+styleTxt+
+    'body{background:#fff;padding:26px}.panel{border:0;box-shadow:none;max-width:900px;margin:0 auto}'+
+    '.rbar{max-width:900px;margin:0 auto 18px;display:flex;justify-content:space-between;align-items:center;font-family:Inter,sans-serif;font-size:12px;color:#6B7B8A}'+
+    '.rbar button{font-family:Archivo,sans-serif;font-weight:600;background:#16202B;color:#fff;border:0;padding:9px 18px;border-radius:9px;cursor:pointer}'+
+    '@media print{.rbar{display:none}}</style></head><body>'+
+    '<div class="rbar"><span>Generated '+stamp+'</span><button onclick="window.print()">Print / Save as PDF</button></div>'+
+    '<section class="panel">'+content+'</section></body></html>';
+  const blob=new Blob([doc],{type:"text/html"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="ai-assessment-report.html";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},1500);
+}
+
+/* helpers */
+function escapeHTML(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function escapeAttr(s){return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+
+render();
+</script>
+</body>
+</html>
