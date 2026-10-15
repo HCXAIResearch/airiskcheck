@@ -10,7 +10,7 @@
 | Audience | AI governance leads, DPOs and risk owners, compliance and assurance teams, ISO/IEC 42001 implementers |
 | Standards Reference | EU AI Act (Regulation 2024/1689); ISO/IEC 42001:2023. Classification cross-reads informed by NIST AI RMF 1.0 and OECD AI Principles |
 | License | See LICENSE |
-| Project Link | https://hcxairesearch.github.io/ai-risk-checker/ *(provisional)* |
+| Project Link | https://hcxairesearch.github.io/airiskcheck/ |
 
 A single-file, browser-based tool that walks an AI system through a structured risk and algorithmic assessment against **two frameworks at once** — the EU AI Act as binding law and ISO/IEC 42001 as the management-system standard — and shows, at every stage, which provision of each is in play. You answer the questions, rate the risks, and export a practical report as HTML, Markdown or print-to-PDF.
 
